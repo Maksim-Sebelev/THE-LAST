@@ -136,8 +136,8 @@ last::node::BasicNode last::node::create(NodeT node)
 Для этого реализован макрос в `include/create-basic-node.hpp`:
 
 ```cpp
-#define SPECIALIZE_CREATE(NodeT, ...)
-template <>
+#define SPECIALIZE_CREATE(NodeT, ...)                                            \
+template <>                                                                      \
 last::node::BasicNode last::node::create(NodeT node)                             \
 {                                                                                \
     return last::node::BasicNode::Actions<__VA_ARGS__>::create(std::move(node)); \
@@ -229,15 +229,30 @@ write реализует запись ast (аргумент ast) в файл (а
 
 [Пример такой записи](./assets/ast-text-format-example.txt)
 
+<br>
+
+
 ```cpp
 last::AST last::read(std::filesystem::path const & ast_txt);
 ```
 
 read реализует чтение ast из текстового представления (аргумент ast_txt). Является парной для write.
 
+<br>
+
 ```cpp
 void dump(last::AST const & ast, std::filesystem::path const & dot_file, std::filesystem::path const & img_file = "");
 ```
 
 dump реализует дамп ast (аргумент ast) в формате [Graphviz](https://graphviz.org/). Дамп происходит в файл dot_file. Если аргумент img_file являтся пустой строкой (значение по умолчанию), то будет просто произведена генерация файла dot_file. Если же img_file не является пустой строкой, то будет сгенерирован файл с изображением ast. Это будет сделано путем явного вызова graphviz.
+
+<br>
+
+```cpp
+template <typename... Signatures>
+bool last::node::support(BasicNode const& node);
+```
+
+Возврщаает true, если нода поддерживает все сигнатуры, иначе false.
+
 
