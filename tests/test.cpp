@@ -178,8 +178,7 @@ int main() try
     auto&& root = create_same(std::move(nast4));
     auto&& ast = AST{std::move(root)};
     write(ast, "ast.txt");
-    // dump(ast, "ast.svg", "ast.dot");
-    dump(ast, "ast.svg");
+    dump(ast, "ast.dot");
 
     return 0;
 }

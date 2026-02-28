@@ -62,7 +62,7 @@ void dump(AST const & ast, std::filesystem::path const & dot_file = "/tmp/ast.do
 {
     constexpr const char dot_extension[] = ".dot";
     if (dot_file.extension() != dot_extension)
-        throw std::runtime_error("expect .dot (graphiv extension) file as second argument of ' void dump(AST const&, std::filesystem::path const&, std::filesystem::path const&)");
+        throw std::runtime_error("expect .dot (graphiv extension) file as first argument of 'void dump(AST const&, std::filesystem::path const&, std::filesystem::path const&)");
 
     std::ofstream os{dot_file};
 
