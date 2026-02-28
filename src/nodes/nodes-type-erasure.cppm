@@ -259,8 +259,9 @@ public:
 /*
 this function need to create BasicNode by your node.
 in your code, specialize it for every node, you`re using.
-use BasicNode::create() for this.
+use BasicNode::Actions<...>::create() for this.
 */
+
 export
 template <typename NodeT>
 BasicNode create(NodeT)
@@ -271,22 +272,6 @@ BasicNode create(NodeT)
     */
     static_assert(false, "using unspecialized create.");
 };
-
-/*
-
-***next functoinally is impossible to realize as library function***
-
-if you dont need specialize 'create' for every node personal:
-
-if you need to have function to create nodes with same visit functions,
-use something like this:
-
-template <typename NodeT>
-BasicNode create_same(NodeT&& node)
-{
-    return BasicNode::Actions<__your_signatures__>::create(std::forward<NodeT>(node));
-}
-*/
 
 //--------------------------------------------------------------------------------------------------------------------------------------
 } /* namespace last::node */

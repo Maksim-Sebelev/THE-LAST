@@ -4,6 +4,7 @@ module;
 #include <cstddef>
 #include <iostream>
 #include <fstream>
+#include <ostream>
 #include <string>
 #include <filesystem>
 
@@ -80,7 +81,7 @@ namespace last
 export
 void write(AST const & ast, std::filesystem::path const &file)
 {
-    std::ofstream ofs{file};
+    auto&& ofs = std::ofstream{file};
     if (ofs.fail()) throw std::runtime_error("failed open '" + file.string() + "' for write ast.");
 
     ofs << Info::instance().ast_text_representation_signature();

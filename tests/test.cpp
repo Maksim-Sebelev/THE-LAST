@@ -7,6 +7,10 @@
 
 import thelast;
 
+
+#include "create-basic-node.hpp"
+
+
 using namespace ::last::node;
 using namespace ::last;
 
@@ -55,6 +59,10 @@ void visit([[maybe_unused]] BinaryOperator const & bp)
 template <>
 void visit([[maybe_unused]] UnaryOperator const & uo)
 { std::cout << "UnaryOp{}\n";}
+
+template <>
+void visit([[maybe_unused]] While const & uo)
+{ std::cout << "While{}\n";}
 }
 
 namespace last::node::visit_specializations
@@ -103,7 +111,16 @@ template <>
 void visit(StringLiteral const & v, int& i)
 { std::cout << "StringLiteral{" << "} " << ++i << std::endl; }
 
+template <>
+void visit(While const & v, int& i)
+{ std::cout << "While{" << "} " << ++i << std::endl; }
+
 }
+
+using printable = void();
+using printable_and_countable = void(int&);
+
+CREATE_SAME(printable, printable_and_countable, writable, dumpable)
 
 void print(BasicNode const & node)
 { return visit<void>(node); }
@@ -111,41 +128,33 @@ void print(BasicNode const & node)
 void print_and_count(BasicNode const & node, int & i)
 { return visit<void, int&>(node, i); }
 
-using printable = void();
-using printable_and_countable = void(int&);
-
-template <typename NodeT>
-BasicNode create_same(NodeT&& node)
-{ return BasicNode::Actions<printable, printable_and_countable, writable, dumpable>::create(std::forward<NodeT>(node)); }
-
-
-// template <>
-// BasicNode last::node::create(Scan node)
-// { return BasicNode::Actions<printable>::create(std::move(node)); }
 
 int main() try
 {
     int i = 0;
 
-    auto&& n1 = create_same(Scope{});
-    auto&& n2 = create_same(Scope{});
+    auto&& n = last::node::create(Scan{});
+    print(n);
+
+    auto&& n1 = create(Scope{});
+    auto&& n2 = create(Scope{});
 
     print_and_count(n1, i);
     print_and_count(n2, i);
 
-    auto&& n6 = create_same(NumberLiteral{13});
-    auto&& n7 = create_same(StringLiteral{"fuck me please"});
+    auto&& n6 = create(NumberLiteral{13});
+    auto&& n7 = create(StringLiteral{"fuck me please"});
 
-    auto&& n12 = create_same(Scan{});
-    auto&& n22 = create_same(Print{});
-    auto&& n72 = create_same(If{{n6}, n22});
-    auto&& n82 = create_same(Else{n12});
+    auto&& n12 = create(Scan{});
+    auto&& n22 = create(Print{});
+    auto&& n72 = create(If{{n6}, n22});
+    auto&& n82 = create(Else{n12});
 
     auto&& condition = Condition{{n72}, n82};
-    auto&& n32 = create_same(std::move(condition));
+    auto&& n32 = create(std::move(condition));
     auto&& condition2 = n32;
 
-    auto&& n8 = create_same(BinaryOperator{BinaryOperator::ADD, n6, condition2});
+    auto&& n8 = create(BinaryOperator{BinaryOperator::ADD, n6, condition2});
 
     print_and_count(n12, i);
     print(n12);
@@ -164,18 +173,18 @@ int main() try
     print_and_count(n52, i);
     print(n52);
 
-    auto&& n62 = create_same(Variable{"some name"});
+    auto&& n62 = create(Variable{"some name"});
     print_and_count(n62, i);
     print(n62);
 
-    auto&& nast1 = create_same(Print{n62, n6, n7});
+    auto&& nast1 = create(Print{n62, n6, n7});
     auto&& nast2 = n6;
     auto&& nast3 = n32;
     auto&& nast4 = Scope{nast1, nast2, nast3};
-    auto&& nast5 = create_same(Print{n1, n2, n82, n8});
+    auto&& nast5 = create(Print{n1, n2, n82, n8});
     nast4.push_back(nast5);
 
-    auto&& root = create_same(std::move(nast4));
+    auto&& root = create(std::move(nast4));
     auto&& ast = AST{std::move(root)};
     write(ast, "ast.txt");
     dump(ast, "ast.dot");

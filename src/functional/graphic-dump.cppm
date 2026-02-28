@@ -58,13 +58,13 @@ namespace last
 {
 
 export
-void dump(AST const & ast, std::filesystem::path const & dot_file = "/tmp/ast.dot", std::filesystem::path const & img_file = "")
+void dump(AST const & ast, std::filesystem::path const & dot_file, std::filesystem::path const & img_file = "")
 {
     constexpr const char dot_extension[] = ".dot";
     if (dot_file.extension() != dot_extension)
         throw std::runtime_error("expect .dot (graphiv extension) file as first argument of 'void dump(AST const&, std::filesystem::path const&, std::filesystem::path const&)");
 
-    std::ofstream os{dot_file};
+    auto&& os = std::ofstream{dot_file};
 
     if (os.fail()) throw std::runtime_error("failed open " + dot_file.string());
 
@@ -218,11 +218,21 @@ void visit(Condition const& node, unique_node_id_t unique_node_id, std::ofstream
 
     auto&& first_if = true;
 
-    for (auto&& arg : node.get_ifs())
-    {
-        graphic_dump::dump_and_link_with_parent(os, unique_node_id, arg, (first_if ? "if" : "elif"));
-        first_if = false;
-    }
+    auto&& ifs = node.get_ifs();
+
+    if (ifs.size() == 0) return;
+
+    graphic_dump::dump_and_link_with_parent(os, unique_node_id, *(ifs.begin()), "if");
+    
+    for (auto&& it = ifs.begin() + 1, ite = ifs.end(); it != ite; ++it)
+        graphic_dump::dump_and_link_with_parent(os, unique_node_id, *it, "else-if");
+
+
+    // for (auto&& arg : node.get_ifs())
+    // {
+        // graphic_dump::dump_and_link_with_parent(os, unique_node_id, arg, (first_if ? "if" : "elif"));
+        // first_if = false;
+    // }
 
     graphic_dump::dump_and_link_with_parent(os, unique_node_id, node.get_else(), "else");
 }

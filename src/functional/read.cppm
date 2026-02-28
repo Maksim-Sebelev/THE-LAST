@@ -13,11 +13,10 @@ namespace last
 {
 
 export
-template <typename... Signatures>
-AST read_ast_txt(std::filesystem::path const & ast_txt)
+AST read(std::filesystem::path const & ast_txt)
 {
     /* must call create */
-    static_assert(false, "not ready now");
+    // static_assert(false, "not ready now");
 }
 
 } /* namespace last */

@@ -180,4 +180,10 @@ PRIVATE
     ${THELAST_LIB}
 )
 
+target_include_directories(test
+
+PRIVATE
+    ${SRC_DIR}/../include
+)
+
 # =================================================================================================
