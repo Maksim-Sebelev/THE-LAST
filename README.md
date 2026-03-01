@@ -169,23 +169,6 @@ SPECIALIZE_CREATE(Variable        , __VA_ARGS__)
 
 Да, я каюсь, я прибегнул к ужасным методам, но в свое оправдание скажу - можно обойтись и без них, просто надо будет больше писать однотипного кода. Использовать макросы или нет - Ваш выбор :)
 
-```cpp
-template <typename NodeT>
-last::node::BasicNode create(NodeT&&);
-```
-
-Если Вам необходимо сделать все ноды с одинаковой поддержкой сигнатур, то определите его так:
-
-```cpp
-template <typename NodeT>
-last::BasicNode create(NodeT&& node)
-{
-    return last::node::BasicNode::Actions</*your signatures*/>::create(std::forward<NodeT>(node));
-}
-```
-
-Если же вам нужна индивидульная поддержка сигнатур visit для каждой ноды, то просто специализируйте этот шаблон для каждой ноды
-
 ## Установка и сборка
 
 ```shell
