@@ -171,8 +171,12 @@ target_link_libraries(${THELAST_LIB}
 
 # =================================================================================================
 
+add_library(TheLast::TheLast ALIAS ${THELAST_LIB})
+
+# =================================================================================================
+
 add_executable(test
-${SRC_DIR}/../tests/test.cpp
+${PROJECT_SOURCE_DIR}/tests/test.cpp
 )
 
 target_link_libraries(test
