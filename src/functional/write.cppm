@@ -8,8 +8,8 @@ module;
 #include <string>
 #include <filesystem>
 
-#define FIELD_BEGIN(NodeT, os, node_tabs, n) write_in_file::field_begin(os, node_tabs, traits::get_node_info<NodeT, traits::FIELD, n>(), n, false)
-#define FIELD_BEGIN_SELF_ALIGNMENT(NodeT, os, node_tabs, n) write_in_file::field_begin(os, node_tabs, traits::get_node_info<NodeT, traits::FIELD, n>(), n, true)
+#define FIELD_BEGIN(NodeT, os, node_tabs, n) write_in_file::field_begin(os, node_tabs, traits::get_node_info<NodeT, traits::FIELD, n>(), /* n, */ false)
+#define FIELD_BEGIN_SELF_ALIGNMENT(NodeT, os, node_tabs, n) write_in_file::field_begin(os, node_tabs, traits::get_node_info<NodeT, traits::FIELD, n>(), /* n, */ true)
 
 #define FIELD(NodeT, os, node_tabs, n, value) do { \
     FIELD_BEGIN(NodeT, os, node_tabs, n);          \
@@ -66,8 +66,8 @@ void write_begin(std::ofstream& os, size_t tabs = 0LU)
 void write_end(std::ofstream& os, size_t tabs = 0LU)
 { close_bracket(os, tabs); }
 
-void field_begin(std::ofstream& os, size_t node_tabs, std::string_view field_name, size_t field_num, bool self_alignment)
-{ n_tab(os, node_tabs + 1LU); os << "field[" << field_num << "]:" << field_name; open_bracket(os); if (self_alignment) return; n_tab(os, node_tabs + field_enclosure_alignment); }
+void field_begin(std::ofstream& os, size_t node_tabs, std::string_view field_name, /* size_t field_num,*/ bool self_alignment)
+{ n_tab(os, node_tabs + 1LU); os /* << "field[" << field_num << "]:" */ << field_name; open_bracket(os); if (self_alignment) return; n_tab(os, node_tabs + field_enclosure_alignment); }
 
 void field_end(std::ofstream& os, size_t node_tabs, bool self_alignment = false)
 { if (not self_alignment) os << "\n"; close_bracket(os, node_tabs + arg_enclosure_aligment); }
