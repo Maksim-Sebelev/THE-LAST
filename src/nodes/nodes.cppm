@@ -294,12 +294,12 @@ private:
 public:
     Condition() = default;
 
-    Condition(std::vector<BasicNode> ifs, BasicNode else_а_как_вот_это_назвать) :
-       ifs_(std::move(ifs)), else_(std::move(else_а_как_вот_это_назвать))
+    Condition(std::vector<BasicNode>  const &ifs, BasicNode const & else_а_как_вот_это_назвать) :
+       ifs_(ifs), else_(else_а_как_вот_это_назвать)
     {}
 
     Condition(std::vector<BasicNode>&& ifs, BasicNode&& else_а_как_вот_это_назвать) :
-       ifs_(ifs), else_(else_а_как_вот_это_назвать)
+       ifs_(std::move(ifs)), else_(std::move(else_а_как_вот_это_назвать))
     {}
 
 public:
