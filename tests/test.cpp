@@ -190,7 +190,7 @@ int main() try
     write(ast, "ast.txt");
     dump(ast, "ast.dot", "ast.svg");
 
-    auto&& readed_ast = read("ast.2.txt");
+    auto&& readed_ast = read("ast.txt");
     write(ast, "ast.2.txt");
     dump(readed_ast, "ast.2.dot", "readed-ast.svg");
 
