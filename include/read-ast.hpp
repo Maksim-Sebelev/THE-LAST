@@ -2,6 +2,8 @@
 
 #warning "Stupid read realisation. Use newer versions."
 
+
+#if not defined(THELAST_READ_AST_NO_INCLUDES)
 #include <ostream>
 #include <fstream>
 #include <filesystem>
@@ -12,7 +14,7 @@
 #include <sstream>
 #include <stack>
 #include <vector>
-
+#endif /* not defined(THELAST_READ_AST_NO_INCLUDES) */
 
 namespace last::node
 {
