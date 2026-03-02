@@ -49,7 +49,7 @@ namespace last
         #endif
         ;
 
-        static constexpr const char ast_text_representation_signature_[] = "THE-LAST-@PROJECT_VERSION@-ast-text-format\n\n";
+        static constexpr const char ast_text_representation_signature_[] = "THE-LAST-@PROJECT_VERSION@-ast-text-format";
 
       public:
 
@@ -74,13 +74,13 @@ namespace last
         std::string_view ast_text_representation_signature() const
         { return ast_text_representation_signature_; }
 
-        static const Info& instance()
+        static const Info& get()
         {
             static constexpr Info last_info;
             return last_info;
         }
 
-        /* not allowed to create copy of this struct and move it, only get reference on the only once instance */
+        /* not allowed to create copy of this struct and move it, only get reference on the only once object */
         Info(const Info&) = delete;
         Info(Info&&) = delete;
         Info& operator = (const Info&) = delete;

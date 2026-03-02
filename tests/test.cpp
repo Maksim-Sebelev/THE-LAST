@@ -121,6 +121,7 @@ using printable = void();
 using printable_and_countable = void(int&);
 
 CREATE_SAME(printable, printable_and_countable, writable, dumpable)
+import ast_read;
 
 void print(BasicNode const & node)
 { return visit<void>(node); }
@@ -187,7 +188,11 @@ int main() try
     auto&& root = create(std::move(nast4));
     auto&& ast = AST{std::move(root)};
     write(ast, "ast.txt");
-    dump(ast, "ast.dot");
+    dump(ast, "ast.dot", "ast.svg");
+
+    auto&& readed_ast = read("ast.2.txt");
+    write(ast, "ast.2.txt");
+    dump(readed_ast, "ast.2.dot", "readed-ast.svg");
 
     return 0;
 }

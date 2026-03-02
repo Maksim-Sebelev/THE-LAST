@@ -84,7 +84,7 @@ void write(AST const & ast, std::filesystem::path const &file)
     auto&& ofs = std::ofstream{file};
     if (ofs.fail()) throw std::runtime_error("failed open '" + file.string() + "' for write ast.");
 
-    ofs << Info::instance().ast_text_representation_signature();
+    ofs << Info::get().ast_text_representation_signature() << "\n";
 
     node::write(ast.root(), ofs, 0LU);
 }

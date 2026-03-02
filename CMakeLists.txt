@@ -19,6 +19,7 @@ endif()
 # set some global varibles
 
 set(SRC_DIR ${PROJECT_SOURCE_DIR}/src)
+set(INC_DIR ${PROJECT_SOURCE_DIR}/include)
 set(CMAKE_SETTINGS_DIR ${PROJECT_SOURCE_DIR}/cmake)
 
 string(TIMESTAMP CURRENT_TIME "%Y-%m-%d %H:%M:%S")
@@ -181,13 +182,12 @@ ${PROJECT_SOURCE_DIR}/tests/test.cpp
 
 target_link_libraries(test
 PRIVATE
-    ${THELAST_LIB}
+    TheLast::TheLast
 )
 
 target_include_directories(test
-
 PRIVATE
-    ${SRC_DIR}/../include
+    ${INC_DIR}
 )
 
 # =================================================================================================
