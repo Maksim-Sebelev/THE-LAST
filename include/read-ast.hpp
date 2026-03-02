@@ -1,6 +1,6 @@
-module;
+#pragma once
 
-#error "Read is unsupported now as module. Use header version (read-ast.hpp)"
+#warning "Stupid read realisation. Use newer versions."
 
 #include <ostream>
 #include <fstream>
@@ -13,12 +13,6 @@ module;
 #include <stack>
 #include <vector>
 
-export module ast_read;
-
-export import ast;
-import node_traits;
-import node_type_erasure;
-import last_info;
 
 namespace last::node
 {
@@ -494,7 +488,6 @@ BasicNode read(std::ifstream& ifs)
 namespace last
 {
 
-export
 template <typename unusedT = void>
 AST read(std::filesystem::path const & ast_txt)
 {

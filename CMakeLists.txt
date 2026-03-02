@@ -154,7 +154,7 @@ add_library(${AST_FUNCTIONAL_LIB})
 set(AST_FUNCTIONAL_SRC_DIR ${SRC_DIR}/functional)
 set(AST_FUNCTIONAL_SRC
     ${AST_FUNCTIONAL_SRC_DIR}/write.cppm
-    ${AST_FUNCTIONAL_SRC_DIR}/read.cppm
+    # ${AST_FUNCTIONAL_SRC_DIR}/read.cppm # now realized like header lib
     ${AST_FUNCTIONAL_SRC_DIR}/graphic-dump.cppm
 )
 
@@ -206,6 +206,7 @@ target_link_libraries(${THELAST_LIB}
 
 target_include_directories(${THELAST_LIB}
     PUBLIC
+        ${INC_DIR}
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
 )
 

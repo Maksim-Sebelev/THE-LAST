@@ -121,7 +121,8 @@ using printable = void();
 using printable_and_countable = void(int&);
 
 CREATE_SAME(printable, printable_and_countable, writable, dumpable)
-import ast_read;
+// import ast_read;
+#include "read-ast.hpp"
 
 void print(BasicNode const & node)
 { return visit<void>(node); }
