@@ -18,18 +18,19 @@ endif()
 
 # =================================================================================================
 
-set(SRC_DIR ${CMAKE_CURRENT_SOURCE_DIR}/src)
-set(CMAKE_SETTINGS_DIR ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
+set(THELAST_SRC_DIR ${CMAKE_CURRENT_SOURCE_DIR}/src)
+set(THELAST_INC_DIR ${CMAKE_CURRENT_SOURCE_DIR}/include)
+set(THELAST_CMAKE_SETTINGS_DIR ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
 
 string(TIMESTAMP CURRENT_TIME "%Y-%m-%d %H:%M:%S")
 
 # =================================================================================================
 
-include(${CMAKE_SETTINGS_DIR}/debug.cmake OPTIONAL)
+include(${THELAST_CMAKE_SETTINGS_DIR}/debug.cmake OPTIONAL)
 
 # =================================================================================================
 # crete paracl info library
-set(THELAST_INFO_DIR ${SRC_DIR}/lib-info)
+set(THELAST_INFO_DIR ${THELAST_SRC_DIR}/lib-info)
 set(THELAST_INFO_SRC
     ${THELAST_INFO_DIR}/lib-info.cppm.in
 )
@@ -74,9 +75,7 @@ target_include_directories(${THELAST_INFO_LIB}
         $<BUILD_INTERFACE:${THELAST_INFO_BUILD_DIR}>
 )
 
-if(COMMAND target_hard_debug_options)
-    target_hard_debug_options(${THELAST_INFO_LIB})
-endif()
+target_hard_debug_options(${THELAST_INFO_LIB})
 
 # =================================================================================================
 # node lib
@@ -84,31 +83,27 @@ endif()
 set(NODES_LIB nodes)
 add_library(${NODES_LIB})
 
-set(NODES_SRC_DIR ${SRC_DIR}/nodes)
+set(NODES_THELAST_SRC_DIR ${THELAST_SRC_DIR}/nodes)
 set(NODES_SRC
-    ${NODES_SRC_DIR}/nodes.cppm
-    ${NODES_SRC_DIR}/nodes-type-erasure.cppm
-    ${NODES_SRC_DIR}/nodes-traits.cppm
+    ${NODES_THELAST_SRC_DIR}/nodes.cppm
+    ${NODES_THELAST_SRC_DIR}/nodes-type-erasure.cppm
+    ${NODES_THELAST_SRC_DIR}/nodes-traits.cppm
 )
 
 target_sources(${NODES_LIB}
   PUBLIC
     FILE_SET CXX_MODULES
-    BASE_DIRS ${SRC_DIR}/nodes
+    BASE_DIRS ${THELAST_SRC_DIR}/nodes
     FILES ${NODES_SRC}
 )
 
 target_include_directories(${NODES_LIB}
     PUBLIC
-        $<BUILD_INTERFACE:${SRC_DIR}/nodes>
+        $<BUILD_INTERFACE:${THELAST_SRC_DIR}/nodes>
 )
 
-if(COMMAND target_hard_debug_options)
-    target_hard_debug_options(${NODES_LIB})
-endif()
-if(COMMAND target_hard_debug_sanitizers)
-    target_hard_debug_sanitizers(${NODES_LIB})
-endif()
+target_hard_debug_options(${NODES_LIB})
+target_hard_debug_sanitizers(${NODES_LIB})
 
 # =================================================================================================
 # ast lib (ast = abstract syntax tree)
@@ -116,15 +111,15 @@ endif()
 set(AST_LIB ast)
 add_library(${AST_LIB})
 
-set(AST_SRC_DIR ${SRC_DIR}/ast)
+set(AST_THELAST_SRC_DIR ${THELAST_SRC_DIR}/ast)
 set(AST_SRC
-    ${AST_SRC_DIR}/ast.cppm
+    ${AST_THELAST_SRC_DIR}/ast.cppm
 )
 
 target_sources(${AST_LIB}
   PUBLIC
     FILE_SET CXX_MODULES
-    BASE_DIRS ${SRC_DIR}/ast
+    BASE_DIRS ${THELAST_SRC_DIR}/ast
     FILES ${AST_SRC}
 )
 
@@ -135,15 +130,11 @@ target_link_libraries(${AST_LIB}
 
 target_include_directories(${AST_LIB}
     PUBLIC
-        $<BUILD_INTERFACE:${SRC_DIR}/ast>
+        $<BUILD_INTERFACE:${THELAST_SRC_DIR}/ast>
 )
 
-if(COMMAND target_hard_debug_options)
-    target_hard_debug_options(${AST_LIB})
-endif()
-if(COMMAND target_hard_debug_sanitizers)
-    target_hard_debug_sanitizers(${AST_LIB})
-endif()
+target_hard_debug_options(${AST_LIB})
+target_hard_debug_sanitizers(${AST_LIB})
 
 # =================================================================================================
 # ast functional
@@ -151,17 +142,17 @@ endif()
 set(AST_FUNCTIONAL_LIB ast-functional)
 add_library(${AST_FUNCTIONAL_LIB})
 
-set(AST_FUNCTIONAL_SRC_DIR ${SRC_DIR}/functional)
+set(AST_FUNCTIONAL_THELAST_SRC_DIR ${THELAST_SRC_DIR}/functional)
 set(AST_FUNCTIONAL_SRC
-    ${AST_FUNCTIONAL_SRC_DIR}/write.cppm
-    # ${AST_FUNCTIONAL_SRC_DIR}/read.cppm # now realized like header lib
-    ${AST_FUNCTIONAL_SRC_DIR}/graphic-dump.cppm
+    ${AST_FUNCTIONAL_THELAST_SRC_DIR}/write.cppm
+    # ${AST_FUNCTIONAL_THELAST_SRC_DIR}/read.cppm # now realized like header lib
+    ${AST_FUNCTIONAL_THELAST_SRC_DIR}/graphic-dump.cppm
 )
 
 target_sources(${AST_FUNCTIONAL_LIB}
   PUBLIC
     FILE_SET CXX_MODULES
-    BASE_DIRS ${SRC_DIR}/functional
+    BASE_DIRS ${THELAST_SRC_DIR}/functional
     FILES ${AST_FUNCTIONAL_SRC}
 )
 
@@ -174,15 +165,11 @@ target_link_libraries(${AST_FUNCTIONAL_LIB}
 
 target_include_directories(${AST_FUNCTIONAL_LIB}
     PUBLIC
-        $<BUILD_INTERFACE:${SRC_DIR}/functional>
+        $<BUILD_INTERFACE:${THELAST_SRC_DIR}/functional>
 )
 
-if(COMMAND target_hard_debug_options)
-    target_hard_debug_options(${AST_FUNCTIONAL_LIB})
-endif()
-if(COMMAND target_hard_debug_sanitizers)
-    target_hard_debug_sanitizers(${AST_FUNCTIONAL_LIB})
-endif()
+target_hard_debug_options(${AST_FUNCTIONAL_LIB})
+target_hard_debug_sanitizers(${AST_FUNCTIONAL_LIB})
 
 # =================================================================================================
 
@@ -192,8 +179,8 @@ add_library(${THELAST_LIB})
 target_sources(${THELAST_LIB}
   PUBLIC
     FILE_SET CXX_MODULES
-    BASE_DIRS ${SRC_DIR}
-    FILES ${SRC_DIR}/thelast.cppm
+    BASE_DIRS ${THELAST_SRC_DIR}
+    FILES ${THELAST_SRC_DIR}/thelast.cppm
 )
 
 target_link_libraries(${THELAST_LIB}
@@ -206,7 +193,7 @@ target_link_libraries(${THELAST_LIB}
 
 target_include_directories(${THELAST_LIB}
     PUBLIC
-        ${INC_DIR}
+        # ${THELAST_INC_DIR}
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
 )
 
