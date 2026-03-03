@@ -9,6 +9,7 @@ module;
 export module ast_write;
 
 export import ast;
+
 import node_type_erasure;
 import ast_nodes;
 import node_traits;
