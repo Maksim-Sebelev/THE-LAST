@@ -9,6 +9,11 @@ project(TheLast
 
 # =================================================================================================
 
+# need for write/read
+find_package(Boost REQUIRED COMPONENTS json)
+
+# =================================================================================================
+
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
@@ -145,8 +150,8 @@ add_library(${AST_FUNCTIONAL_LIB})
 set(AST_FUNCTIONAL_THELAST_SRC_DIR ${THELAST_SRC_DIR}/functional)
 set(AST_FUNCTIONAL_SRC
     ${AST_FUNCTIONAL_THELAST_SRC_DIR}/write.cppm
-    # ${AST_FUNCTIONAL_THELAST_SRC_DIR}/read.cppm # now realized like header lib
     ${AST_FUNCTIONAL_THELAST_SRC_DIR}/graphic-dump.cppm
+
 )
 
 target_sources(${AST_FUNCTIONAL_LIB}
@@ -161,6 +166,8 @@ target_link_libraries(${AST_FUNCTIONAL_LIB}
     ${NODES_LIB}
     ${AST_LIB}
     ${THELAST_INFO_LIB}
+    # boost_json
+    Boost::json
 )
 
 target_include_directories(${AST_FUNCTIONAL_LIB}
@@ -267,3 +274,16 @@ install(FILES
 )
 
 # =================================================================================================
+# test
+
+add_executable(test EXCLUDE_FROM_ALL
+${THELAST_SRC_DIR}/../tests/test.cpp
+)
+
+target_link_libraries(test
+PRIVATE
+    TheLast::TheLast
+)
+
+# =================================================================================================
+

@@ -51,7 +51,14 @@ template <>
 struct NodeTraits<Scope, NodeInfo::FIELDS>
 {
     using type = size_t;
-    static constexpr type value = 0;
+    static constexpr type value = 1;
+};
+
+template <>
+struct NodeTraits<Scope, NodeInfo::FIELD, 0>
+{
+    using type = const char *;
+    static constexpr type value = "args";
 };
 
 //--------------------------------------------------------------------------------------------------------------------------------------

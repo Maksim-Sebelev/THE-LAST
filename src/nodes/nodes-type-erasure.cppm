@@ -5,6 +5,7 @@ module;
 #include <any>
 #include <type_traits>
 #include <utility>
+#include <typeinfo>
 
 export module node_type_erasure;
 
@@ -32,6 +33,8 @@ private:
     {
         virtual ~IBaseNode() = default;
         virtual std::unique_ptr<IBaseNode> clone_() const = 0;
+
+        virtual std::type_info const & type() const = 0;
 
         virtual std::any invoke_(const std::type_info& sig, std::any* args) const = 0;
         virtual bool supports_signature_(const std::type_info& sig) const = 0;
@@ -94,6 +97,9 @@ private:
                 }
             }
         };
+
+        std::type_info const & type() const override
+        { return typeid(NodeT); }
 
         template<size_t... Is>
         bool supports_signature_impl_(const std::type_info& sig, std::index_sequence<Is...>) const
@@ -252,6 +258,10 @@ public:
     /* move ctor/assign */
     BasicNode(BasicNode&& other) noexcept = default;
     BasicNode& operator=(BasicNode&&) noexcept = default;
+
+    /* check that self is not nullptr */
+    /* implicit */ operator bool() const noexcept
+    { return static_cast<bool>(self_); }
 };
 
 //--------------------------------------------------------------------------------------------------------------------------------------

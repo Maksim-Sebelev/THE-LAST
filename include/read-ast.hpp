@@ -1,510 +1,179 @@
+
 #pragma once
 
-#warning "Stupid read realisation. Use newer versions."
-
-
 #if not defined(THELAST_READ_AST_NO_INCLUDES)
-#include <ostream>
-#include <fstream>
-#include <filesystem>
-#include <utility>
-#include <stdexcept>
-#include <memory>
+#include <string_view>
 #include <string>
-#include <sstream>
-#include <stack>
 #include <vector>
+#include <stdexcept>
+#include <sstream>
+#include <iostream>
+#include <filesystem>
+#include <fstream>
+#include <boost/json.hpp>
 #endif /* not defined(THELAST_READ_AST_NO_INCLUDES) */
 
-namespace last::node
-{
-
-template <typename unusedT = void>
-BasicNode read(std::ifstream& ifs);
-
-void skip_whitespace(std::ifstream& ifs)
-{
-    while (ifs.peek() == ' ' || ifs.peek() == '\n' || ifs.peek() == '\t' || ifs.peek() == '\r')
-        ifs.get();
-}
-
-bool check_open_bracket(std::ifstream& ifs)
-{
-    skip_whitespace(ifs);
-    auto&& potential_bracket = char{};
-    ifs >> potential_bracket;
-    return (potential_bracket == '{');
-}
-
-bool check_close_bracket(std::ifstream& ifs)
-{
-    skip_whitespace(ifs);
-    auto&& potential_bracket = char{};
-    ifs >> potential_bracket;
-    return (potential_bracket == '}');
-}
-
-void check_expected_token(std::ifstream& ifs, const std::string& expected)
-{
-    skip_whitespace(ifs);
-    auto&& token = std::string{};
-    ifs >> token;
-    if (token != expected)
-        throw std::runtime_error("expected '" + expected + "' but got '" + token + "'");
-}
-
-std::string read_quoted_string(std::ifstream& ifs)
-{
-    skip_whitespace(ifs);
-    auto&& quote = char{};
-    ifs.get(quote);
-    if (quote != '"')
-        throw std::runtime_error("expected '\"' at start of string");
-    
-    std::string result;
-    char ch;
-    while (ifs.get(ch) && ch != '"')
-        result += ch;
-    
-    return result;
-}
-
-template <typename unusedT = void>
-BasicNode read_scope(std::ifstream& ifs)
-{
-    if (not check_open_bracket(ifs))
-        throw std::runtime_error("expect '{' after 'Scope'");
-
-    auto&& node = Scope{};
-
-    try {
-        while (true)
-            node.push_back(read(ifs));
-    } catch(...) {
-    }
-
-    return last::node::template create(std::move(node));
-}
-
-template <typename unusedT = void>
-BasicNode read_print(std::ifstream& ifs)
-{
-    if (not check_open_bracket(ifs))
-        throw std::runtime_error("expect '{' after 'Print'");
-
-    auto&& node = Print{};
-
-    try {
-        while (true)
-            node.push_back(read(ifs));
-    } catch(...) {
-    }
-
-    
-    return last::node::template create(std::move(node));
-}
-
-template <typename unusedT = void>
-BasicNode read_scan(std::ifstream& ifs)
-{
-    if (not check_open_bracket(ifs))
-        throw std::runtime_error("expect '{' after 'Scan'");
-
-    if (not check_close_bracket(ifs))
-        throw std::runtime_error("expect '}' after 'Scan'");
-    
-    auto&& node = Scan{};
-    return last::node::template create(std::move(node));
-}
-
-template <typename unusedT = void>
-BasicNode read_number_literal(std::ifstream& ifs)
-{
-    if (not check_open_bracket(ifs))
-        throw std::runtime_error("expect '{' after 'NumberLiteral'");
-
-    check_expected_token(ifs, "value");
-
-    if (not check_open_bracket(ifs))
-        throw std::runtime_error("expect '{' after 'value'");
-
-    auto&& value = int{};
-    ifs >> value;
-
-    if (not check_close_bracket(ifs))
-        throw std::runtime_error("expect '}' after value");
-
-    if (not check_close_bracket(ifs))
-        throw std::runtime_error("expect '}' after NumberLiteral");
-
-    auto&& node = NumberLiteral{value};
-    return last::node::template create(std::move(node));
-}
-
-template <typename unusedT = void>
-BasicNode read_string_literal(std::ifstream& ifs)
-{
-    if (not check_open_bracket(ifs))
-        throw std::runtime_error("expect '{' after 'StringLiteral'");
-
-    check_expected_token(ifs, "value");
-
-    if (not check_open_bracket(ifs))
-        throw std::runtime_error("expect '{' after 'value'");
-
-    auto&& value = read_quoted_string(ifs);
-
-    if (not check_close_bracket(ifs))
-        throw std::runtime_error("expect '}' after value");
-
-    if (not check_close_bracket(ifs))
-        throw std::runtime_error("expect '}' after StringLiteral");
-
-    auto&& node = StringLiteral{std::move(value)};
-    return last::node::template create(std::move(node));
-}
-
-template <typename unusedT = void>
-BasicNode read_variable(std::ifstream& ifs)
-{
-    if (not check_open_bracket(ifs))
-        throw std::runtime_error("expect '{' after 'Variable'");
-
-    check_expected_token(ifs, "name");
-
-    if (not check_open_bracket(ifs))
-        throw std::runtime_error("expect '{' after 'name'");
-
-    auto&& name = read_quoted_string(ifs);
-
-    if (not check_close_bracket(ifs))
-        throw std::runtime_error("expect '}' after name");
-
-    if (not check_close_bracket(ifs))
-        throw std::runtime_error("expect '}' after Variable");
-
-    auto&& node = Variable{std::move(name)};
-    return last::node::template create(std::move(node));
-}
-
-template <typename unusedT = void>
-BasicNode read_unary_operator(std::ifstream& ifs)
-{
-    if (not check_open_bracket(ifs))
-        throw std::runtime_error("expect '{' after 'UnaryOperator'");
-
-    check_expected_token(ifs, "type");
-
-    if (not check_open_bracket(ifs))
-        throw std::runtime_error("expect '{' after 'type'");
-
-    auto&& op_type = std::string{};
-    ifs >> op_type;
-
-    if (not check_close_bracket(ifs))
-        throw std::runtime_error("expect '}' after type");
-
-    check_expected_token(ifs, "operand");
-
-    if (not check_open_bracket(ifs))
-        throw std::runtime_error("expect '{' after 'operand'");
-
-    auto&& operand = read(ifs);
-
-    if (not check_close_bracket(ifs))
-        throw std::runtime_error("expect '}' after operand");
-
-    if (not check_close_bracket(ifs))
-        throw std::runtime_error("expect '}' after UnaryOperator");
-
-    auto&& type = UnaryOperator::UnaryOperatorT{};
-
-    if (op_type == "+") type = UnaryOperator::PLUS;
-    else if (op_type == "-") type = UnaryOperator::MINUS;
-    else if (op_type == "!") type = UnaryOperator::NOT;
-    else throw std::runtime_error("unknown unary operator type: " + op_type);
-
-    auto&& node = UnaryOperator{type, std::move(operand)};
-    return last::node::template create(std::move(node));
-}
-
-template <typename unusedT = void>
-BasicNode read_binary_operator(std::ifstream& ifs)
-{
-    if (not check_open_bracket(ifs))
-        throw std::runtime_error("expect '{' after 'BinaryOperator'");
-
-    check_expected_token(ifs, "type");
-
-    if (not check_open_bracket(ifs))
-        throw std::runtime_error("expect '{' after 'type'");
-
-    auto&& op_type = std::string{};
-    ifs >> op_type;
-
-    if (not check_close_bracket(ifs))
-        throw std::runtime_error("expect '}' after type");
-
-    check_expected_token(ifs, "left");
-
-    if (not check_open_bracket(ifs))
-        throw std::runtime_error("expect '{' after 'left'");
-
-    auto&& left = read(ifs);
-
-    if (not check_close_bracket(ifs))
-        throw std::runtime_error("expect '}' after left");
-
-    check_expected_token(ifs, "right");
-
-    if (not check_open_bracket(ifs))
-        throw std::runtime_error("expect '{' after 'right'");
-
-    auto&& right = read(ifs);
-
-    if (not check_close_bracket(ifs))
-        throw std::runtime_error("expect '}' after right");
-
-    if (not check_close_bracket(ifs))
-        throw std::runtime_error("expect '}' after BinaryOperator");
-
-    auto&& type = BinaryOperator::BinaryOperatorT{};
-
-    if (op_type == "&&") type = BinaryOperator::AND;
-    else if (op_type == "||") type = BinaryOperator::OR;
-    else if (op_type == "!") type = BinaryOperator::NOT;
-    else if (op_type == "+") type = BinaryOperator::ADD;
-    else if (op_type == "-") type = BinaryOperator::SUB;
-    else if (op_type == "*") type = BinaryOperator::MUL;
-    else if (op_type == "/") type = BinaryOperator::DIV;
-    else if (op_type == "%") type = BinaryOperator::REM;
-    else if (op_type == ">") type = BinaryOperator::ISAB;
-    else if (op_type == ">=") type = BinaryOperator::ISABE;
-    else if (op_type == "<") type = BinaryOperator::ISLS;
-    else if (op_type == "<=") type = BinaryOperator::ISLSE;
-    else if (op_type == "==") type = BinaryOperator::ISEQ;
-    else if (op_type == "!=") type = BinaryOperator::ISNE;
-    else if (op_type == "=") type = BinaryOperator::ASGN;
-    else if (op_type == "+=") type = BinaryOperator::ADDASGN;
-    else if (op_type == "-=") type = BinaryOperator::SUBASGN;
-    else if (op_type == "*=") type = BinaryOperator::MULASGN;
-    else if (op_type == "/=") type = BinaryOperator::DIVASGN;
-    else if (op_type == "%=") type = BinaryOperator::REMASGN;
-    else throw std::runtime_error("unknown binary operator type: " + op_type);
-
-    auto&& node = BinaryOperator{type, std::move(left), std::move(right)};
-    return last::node::template create(std::move(node));
-}
-
-template <typename unusedT = void>
-BasicNode read_if(std::ifstream& ifs)
-{
-    if (not check_open_bracket(ifs))
-        throw std::runtime_error("expect '{' after 'If'");
-
-    check_expected_token(ifs, "condition");
-
-    if (not check_open_bracket(ifs))
-        throw std::runtime_error("expect '{' after 'condition'");
-
-    auto&& condition = read(ifs);
-
-    if (not check_close_bracket(ifs))
-        throw std::runtime_error("expect '}' after condition");
-
-    check_expected_token(ifs, "body");
-
-    if (not check_open_bracket(ifs))
-        throw std::runtime_error("expect '{' after 'body'");
-
-    auto&& body = read(ifs);
-
-    if (not check_close_bracket(ifs))
-        throw std::runtime_error("expect '}' after body");
-
-    if (not check_close_bracket(ifs))
-        throw std::runtime_error("expect '}' after If");
-
-    auto&& node = If{std::move(condition), std::move(body)};
-    return last::node::template create(std::move(node));
-}
-
-template <typename unusedT = void>
-BasicNode read_else(std::ifstream& ifs)
-{
-    if (not check_open_bracket(ifs))
-        throw std::runtime_error("expect '{' after 'Else'");
-
-    check_expected_token(ifs, "body");
-
-    if (not check_open_bracket(ifs))
-        throw std::runtime_error("expect '{' after 'body'");
-
-    auto&& body = read(ifs);
-
-    if (not check_close_bracket(ifs))
-        throw std::runtime_error("expect '}' after body");
-
-    if (not check_close_bracket(ifs))
-        throw std::runtime_error("expect '}' after Else");
-
-    auto&& node = Else{std::move(body)};
-    return last::node::template create(std::move(node));
-}
-
-template <typename unusedT = void>
-BasicNode read_condition(std::ifstream& ifs)
-{
-    if (not check_open_bracket(ifs))
-        throw std::runtime_error("expect '{' after 'Condition'");
-
-    std::vector<BasicNode> ifs_nodes;
-
-    check_expected_token(ifs, "if");
-
-    if (not check_open_bracket(ifs))
-        throw std::runtime_error("expect '{' after 'if'");
-
-    auto&& if_node = read(ifs);
-
-    if (not check_close_bracket(ifs))
-        throw std::runtime_error("expect '}' after if");
-
-    ifs_nodes.push_back(std::move(if_node));
-
-    while (true)
-    {
-        skip_whitespace(ifs);
-        if (ifs.peek() == 'i')
-        {
-            auto&& token = std::string{};
-            ifs >> token;
-            if (token == "if")
-            {
-                if (not check_open_bracket(ifs))
-                    throw std::runtime_error("expect '{' after 'if'");
-
-                auto&& next_if = read(ifs);
-
-                if (not check_close_bracket(ifs))
-                    throw std::runtime_error("expect '}' after if");
-
-                ifs_nodes.push_back(std::move(next_if));
-                continue;
-            }
-            else
-            {
-                ifs.seekg(-static_cast<int>(token.length()), std::ios::cur);
-                break;
-            }
-        }
-        else break;
-    }
-
-    check_expected_token(ifs, "else");
-
-    if (not check_open_bracket(ifs))
-        throw std::runtime_error("expect '{' after 'else'");
-
-    auto&& else_node = read(ifs);
-
-    if (not check_close_bracket(ifs))
-        throw std::runtime_error("expect '}' after else");
-
-    if (not check_close_bracket(ifs))
-        throw std::runtime_error("expect '}' after Condition");
-
-    auto&& node = Condition{std::move(ifs_nodes), std::move(else_node)};
-    return last::node::template create(std::move(node));
-}
-
-template <typename unusedT = void>
-BasicNode read_while(std::ifstream& ifs)
-{
-    if (not check_open_bracket(ifs))
-        throw std::runtime_error("expect '{' after 'While'");
-
-    check_expected_token(ifs, "condition");
-
-    if (not check_open_bracket(ifs))
-        throw std::runtime_error("expect '{' after 'condition'");
-
-    auto&& condition = read(ifs);
-
-    if (not check_close_bracket(ifs))
-        throw std::runtime_error("expect '}' after condition");
-
-    check_expected_token(ifs, "body");
-
-    if (not check_open_bracket(ifs))
-        throw std::runtime_error("expect '{' after 'body'");
-
-    auto&& body = read(ifs);
-
-    if (not check_close_bracket(ifs))
-        throw std::runtime_error("expect '}' after body");
-
-    if (not check_close_bracket(ifs))
-        throw std::runtime_error("expect '}' after While");
-
-    auto&& node = While{std::move(condition), std::move(body)};
-    return last::node::template create(std::move(node));
-}
-
-template <typename unusedT>
-BasicNode read(std::ifstream& ifs)
-{
-    skip_whitespace(ifs);
-    auto&& node_type = std::string{};
-    ifs >> node_type;
-    if (node_type == traits::get_node_info<Scope, traits::NAME>())
-        return read_scope(ifs);
-    if (node_type == traits::get_node_info<Print, traits::NAME>())
-        return read_print(ifs);
-    if (node_type == traits::get_node_info<Scan, traits::NAME>())
-        return read_scan(ifs);
-    if (node_type == traits::get_node_info<UnaryOperator, traits::NAME>())
-        return read_unary_operator(ifs);
-    if (node_type == traits::get_node_info<BinaryOperator, traits::NAME>())
-        return read_binary_operator(ifs);
-    if (node_type == traits::get_node_info<Variable, traits::NAME>())
-        return read_variable(ifs);
-    if (node_type == traits::get_node_info<NumberLiteral, traits::NAME>())
-        return read_number_literal(ifs);
-    if (node_type == traits::get_node_info<StringLiteral, traits::NAME>())
-        return read_string_literal(ifs);
-    if (node_type == traits::get_node_info<If, traits::NAME>())
-        return read_if(ifs);
-    if (node_type == traits::get_node_info<Else, traits::NAME>())
-        return read_else(ifs);
-    if (node_type == traits::get_node_info<Condition, traits::NAME>())
-        return read_condition(ifs);
-    if (node_type == traits::get_node_info<While, traits::NAME>())
-        return read_while(ifs);
-
-    throw std::runtime_error("Failed read ast: undefined node type " + node_type);
-}
-
-} /* namespace last::node */
 
 namespace last
 {
-
-template <typename unusedT = void>
-AST read(std::filesystem::path const & ast_txt)
+namespace node::__detail
 {
-    auto&& ifs = std::ifstream{ast_txt};
 
-    if (ifs.fail())
-        throw std::runtime_error("Failed read ast. No such file: " + ast_txt.string());
+BinaryOperator::BinaryOperatorT string_to_bin_op(std::string_view op)
+{
+    using OpT = BinaryOperator::BinaryOperatorT;
 
-    auto&& signature = std::string{};
-    std::getline(ifs, signature);
+    if (op == "+")   return OpT::ADD;     if (op == "-")   return OpT::SUB;
+    if (op == "*")   return OpT::MUL;     if (op == "/")   return OpT::DIV;
+    if (op == "%")   return OpT::REM;     if (op == "&&")  return OpT::AND;
+    if (op == "||")  return OpT::OR;      if (op == ">")   return OpT::ISAB;
+    if (op == ">=")  return OpT::ISABE;   if (op == "<")   return OpT::ISLS;
+    if (op == "<=")  return OpT::ISLSE;   if (op == "==")  return OpT::ISEQ;
+    if (op == "!=")  return OpT::ISNE;    if (op == "=")   return OpT::ASGN;
+    if (op == "+=")  return OpT::ADDASGN; if (op == "-=")  return OpT::SUBASGN;
+    if (op == "*=")  return OpT::MULASGN; if (op == "/=")  return OpT::DIVASGN;
+    if (op == "%=")  return OpT::REMASGN;
 
-    if (signature != Info::get().ast_text_representation_signature())
-        throw std::runtime_error("Bad ast format signature. Unsupported file format: '" + ast_txt.string() + "'");
+    throw std::runtime_error("Unknown binary operator: " + std::string(op));
+}
 
-    return AST{node::read(ifs)};
+UnaryOperator::UnaryOperatorT string_to_un_op(std::string_view op)
+{
+    using OpT = UnaryOperator::UnaryOperatorT;
+    if (op == "-") return OpT::MINUS;
+    if (op == "+") return OpT::PLUS;
+    if (op == "!") return OpT::NOT;
+
+    throw std::runtime_error("Unknown unary operator: " + std::string(op));
+}
+
+BasicNode node_from_json(const boost::json::value& jv)
+{
+    auto&& obj = jv.as_object();
+    auto&& kind = obj.at("kind").as_string();
+
+    if (kind == traits::get_node_info<NumberLiteral, traits::NAME>())
+    {
+        auto&& value = static_cast<int>(obj.at(traits::get_node_info<NumberLiteral, traits::FIELD, 0>()).as_int64());
+        auto&& node = NumberLiteral{std::move(value)};
+        return create(std::move(node));
+    }
+    if (kind == traits::get_node_info<StringLiteral, traits::NAME>())
+    {
+        auto&& value = static_cast<std::string>(obj.at(traits::get_node_info<NumberLiteral, traits::FIELD, 0>()).as_string());
+        auto&& node = StringLiteral{std::move(value)};
+        return create(std::move(node));
+    }
+    if (kind == traits::get_node_info<Variable, traits::NAME>())
+    {
+        auto&& value = static_cast<std::string>(obj.at(traits::get_node_info<Variable, traits::FIELD, 0>()).as_string());
+        auto&& node = Variable{std::move(value)};
+        return create(std::move(node));
+    }
+    if (kind == traits::get_node_info<Scan, traits::NAME>())
+    {
+        auto&& node = Scan{};
+        return create(std::move(node));
+    }
+    if (kind == traits::get_node_info<Print, traits::NAME>())
+    {
+        auto&& args = std::vector<BasicNode>{};
+        for (auto&& arg_jv : obj.at(traits::get_node_info<Print, traits::FIELD, 0>()).as_array())
+            args.push_back(node_from_json(arg_jv));
+        auto&& node = Print{std::move(args)};
+        return create(std::move(node));
+    }
+    if (kind == traits::get_node_info<UnaryOperator, traits::NAME>())
+    {
+        auto&& type = string_to_un_op(obj.at(traits::get_node_info<UnaryOperator, traits::FIELD, 0>()).as_string());
+        auto&& arg = node_from_json(obj.at(traits::get_node_info<UnaryOperator, traits::FIELD, 1>()));
+        auto&& node = UnaryOperator{type, std::move(arg)};
+        return create(std::move(node));
+    }
+    if (kind == traits::get_node_info<BinaryOperator, traits::NAME>())
+    {
+        auto&& type = string_to_bin_op(obj.at(traits::get_node_info<BinaryOperator, traits::FIELD, 0>()).as_string());
+        auto&& left = node_from_json(obj.at(traits::get_node_info<BinaryOperator, traits::FIELD, 1>()));
+        auto&& right = node_from_json(obj.at(traits::get_node_info<BinaryOperator, traits::FIELD, 2>()));
+        auto&& node = BinaryOperator{type, std::move(left), std::move(right)};
+        return create(std::move(node));
+    }
+    if (kind == traits::get_node_info<While, traits::NAME>())
+    {
+        auto&& condition = node_from_json(obj.at(traits::get_node_info<While, traits::FIELD, 0>()));
+        auto&& body = node_from_json(obj.at(traits::get_node_info<While, traits::FIELD, 1>()));
+        auto&& node = While{std::move(condition), std::move(body)};
+        return create(std::move(node));
+    }
+    if (kind == traits::get_node_info<If, traits::NAME>())
+    {
+        auto&& condition = node_from_json(obj.at(traits::get_node_info<If, traits::FIELD, 0>()));
+        auto&& body = node_from_json(obj.at(traits::get_node_info<If, traits::FIELD, 1>()));
+        auto&& node = If{std::move(condition), std::move(body)};
+        return create(std::move(node));
+    }
+    if (kind == traits::get_node_info<Else, traits::NAME>())
+    {
+        auto&& body = node_from_json(obj.at(traits::get_node_info<Else, traits::FIELD, 0>()));
+        auto&& node = Else{std::move(body)};
+        return create(std::move(node));
+    }
+    if (kind == traits::get_node_info<Scope, traits::NAME>())
+    {
+        auto&& statements = std::vector<BasicNode>{};
+        for (auto&& stmt_jv : obj.at(traits::get_node_info<Scope, traits::FIELD, 0>()).as_array())
+            statements.push_back(node_from_json(stmt_jv));
+        auto&& node = Scope{std::move(statements)};
+        return create(std::move(node));
+    }
+    if (kind == traits::get_node_info<Condition, traits::NAME>())
+    {
+        auto&& ifs = std::vector<BasicNode>{};
+        for (auto&& if_jv : obj.at(traits::get_node_info<Condition, traits::FIELD, 0>()).as_array())
+            ifs.push_back(node_from_json(if_jv));
+
+        auto&& else_node = node_from_json(obj.at(traits::get_node_info<Condition, traits::FIELD, 1>()));
+        auto&& node = Condition{std::move(ifs), std::move(else_node)};
+        return create(std::move(node));
+    }
+
+    throw std::runtime_error("Unsupported node kind during deserialization: " + std::string(kind));
+}
+
+} /* namespace node::__detail */
+
+namespace __detail
+{
+
+AST read(std::string_view jsonData)
+{
+    auto&& jv = boost::json::parse(jsonData);
+    auto&& jo = jv.as_object();
+
+    auto&& kind = "kind";
+
+    if (jo.at(kind).as_string() != "AST")
+        throw std::runtime_error("Root JSON element is not a AST");
+
+    auto&& root = node::__detail::node_from_json(jo.at("root"));
+
+    return AST{std::move(root)};
+}
+
+} /* namespace __detail */
+
+AST read(std::filesystem::path const & ast_json)
+{
+    auto&& in = std::ifstream{ast_json};
+
+    if (in.fail())
+        throw std::runtime_error("No such file: " + ast_json.string() + ".\nFailed read ast from json format.");
+
+    auto&& buffer = std::ostringstream{};
+    buffer << in.rdbuf();
+    auto&& jsonData = buffer.str();
+
+    return __detail::read(jsonData);
 }
 
 } /* namespace last */

@@ -4,6 +4,8 @@
 #include <filesystem>
 #include <fstream>
 #include <utility>
+#include <boost/json.hpp>
+#include <boost/json/object.hpp>
 
 import thelast;
 
@@ -121,7 +123,6 @@ using printable = void();
 using printable_and_countable = void(int&);
 
 CREATE_SAME(printable, printable_and_countable, writable, dumpable)
-// import ast_read;
 #include "read-ast.hpp"
 
 void print(BasicNode const & node)
@@ -188,11 +189,11 @@ int main() try
 
     auto&& root = create(std::move(nast4));
     auto&& ast = AST{std::move(root)};
-    write(ast, "ast.txt");
+    write(ast, "ast.json");
     dump(ast, "ast.dot", "ast.svg");
 
-    auto&& readed_ast = read("ast.txt");
-    write(ast, "ast.2.txt");
+    auto&& readed_ast = read("ast.json");
+    write(ast, "ast.2.json");
     dump(readed_ast, "ast.2.dot", "readed-ast.svg");
 
     return 0;

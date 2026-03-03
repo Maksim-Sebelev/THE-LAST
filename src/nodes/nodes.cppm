@@ -124,7 +124,6 @@ public:
     {
         AND,
         OR,
-        NOT,
         ADD,
         SUB,
         MUL,
@@ -309,6 +308,8 @@ public:
     void set_else(BasicNode&& else_а_как_вот_это_назвать)
     { else_ = std::move(else_а_как_вот_это_назвать); }
 
+    bool has_else() const noexcept
+    { return else_; }
 public:
 
     std::vector<BasicNode> const &get_ifs() const & noexcept
