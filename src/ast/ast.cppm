@@ -21,10 +21,14 @@ public:
     AST(node::BasicNode const & root) : /* too long, because all tree will copy */
         root_(root)
     {}
+    
+    AST() = default;
 
     AST(node::BasicNode&& root) :
         root_(std::move(root))
     {}
+
+    
 
 public:
     node::BasicNode const &root() const noexcept
