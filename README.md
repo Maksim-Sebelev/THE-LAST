@@ -263,3 +263,14 @@ bool last::node::support(BasicNode const& node);
 ```
 
 Возврщаает true, если нода поддерживает все сигнатуры, иначе false.
+
+<br>
+
+```cpp
+template <typename T>
+bool last::node::is_a(BasicNode const& node);
+```
+
+Возврщаает true, если нода была инициализирована объектом типа T, иначе false.
+
+<br>
