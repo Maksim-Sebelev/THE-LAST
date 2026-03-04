@@ -156,7 +156,7 @@ int main() try
 
     auto&& condition = Condition{{n72}, n82};
     auto&& n32 = create(std::move(condition));
-    auto&& condition2 = n32;
+    auto&& condition2 = create(NumberLiteral{42});
 
     auto&& n8 = create(BinaryOperator{BinaryOperator::ADD, n6, condition2});
 
@@ -197,7 +197,17 @@ int main() try
     write(ast, "ast.2.json");
     dump(readed_ast, "ast.2.dot", "readed-ast.svg");
 
+    auto&& lastastroot = create(Print{n7});
+    auto&& lastast = AST{std::move(lastastroot)};
+    write(lastast, "last.json");
+
     std::cout << std::boolalpha << is_a<StringLiteral>(n7) << "\n" << is_a<NumberLiteral>(n7) << "\n";
+
+    StringLiteral back_n7 = static_cast<StringLiteral>(n7);
+    std::cout << "back_n7.value() = " << back_n7.value() << "\n";
+
+    NumberLiteral back_n72 = static_cast<NumberLiteral>(n7);
+    std::cout << "back_n72.value() = " << back_n72.value() << "\n";
 
     return 0;
 }

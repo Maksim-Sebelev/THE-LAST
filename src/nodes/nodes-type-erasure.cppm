@@ -42,16 +42,16 @@ private:
 
     template<typename NodeT, typename... Signatures>
     requires (std::is_function_v<Signatures> && ...)
-    class NodeImpl final : public IBaseNode
+    struct NodeImpl final : public IBaseNode
     {
-    private:
         NodeT data_;
 
         template<typename Signature>
         struct Invoker;
 
         template<typename ReturnT, typename... Args>
-        struct Invoker<ReturnT(Args...)> {
+        struct Invoker<ReturnT(Args...)>
+        {
             static std::any call_(const NodeT& data, std::any* args) try
             { return call_impl_(data, args, std::index_sequence_for<Args...>{}); }
             catch (const std::bad_any_cast& e)
@@ -62,7 +62,6 @@ private:
                 );
             }
 
-        private:
             template<typename T>
             static T unwrap_arg_(const std::any& arg)
             {
@@ -267,6 +266,26 @@ public:
     template <typename T>
     friend bool is_a(BasicNode const & node)
     { return (typeid(T) == node.self_->type_()); }
+
+
+    /* convert to a real data */
+    template <typename T>
+    operator const T &() const
+    {
+        if (not is_a<T>(*this))
+            throw std::bad_cast{};
+
+        return (static_cast<const NodeImpl<T>*>(self_.get()))->data_;
+    }
+
+    template <typename T>
+    operator T () const
+    {
+        if (not is_a<T>(*this))
+            throw std::bad_cast{};
+
+        return (static_cast<const NodeImpl<T>*>(self_.get()))->data_;
+    }
 };
 
 //--------------------------------------------------------------------------------------------------------------------------------------
