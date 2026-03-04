@@ -23,6 +23,7 @@ ReturnT visit(NodeT const &, Args...)
 }
 } /* visit_specializations */
 
+//--------------------------------------------------------------------------------------------------------------------------------------
 
 export
 class BasicNode
@@ -33,7 +34,7 @@ private:
         virtual ~IBaseNode() = default;
         virtual std::unique_ptr<IBaseNode> clone_() const = 0;
 
-        virtual std::type_info const & type() const = 0;
+        virtual std::type_info const & type_() const = 0;
 
         virtual std::any invoke_(const std::type_info& sig, std::any* args) const = 0;
         virtual bool supports_signature_(const std::type_info& sig) const = 0;
@@ -97,7 +98,7 @@ private:
             }
         };
 
-        std::type_info const & type() const override
+        std::type_info const & type_() const override
         { return typeid(NodeT); }
 
         template<size_t... Is>
@@ -261,6 +262,11 @@ public:
     /* check that self is not nullptr */
     /* implicit */ operator bool() const noexcept
     { return static_cast<bool>(self_); }
+
+    /* check is the real node type T */
+    template <typename T>
+    friend bool is_a(BasicNode const & node)
+    { return (typeid(T) == node.self_->type_()); }
 };
 
 //--------------------------------------------------------------------------------------------------------------------------------------

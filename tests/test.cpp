@@ -1,3 +1,4 @@
+#include <ios>
 #include <iostream>
 #include <stdexcept>
 #include <typeinfo>
@@ -195,6 +196,8 @@ int main() try
     auto&& readed_ast = read("ast.json");
     write(ast, "ast.2.json");
     dump(readed_ast, "ast.2.dot", "readed-ast.svg");
+
+    std::cout << std::boolalpha << is_a<StringLiteral>(n7) << "\n" << is_a<NumberLiteral>(n7) << "\n";
 
     return 0;
 }
