@@ -258,18 +258,20 @@ public:
     BasicNode(BasicNode&& other) noexcept = default;
     BasicNode& operator=(BasicNode&&) noexcept = default;
 
-    /* check that self is not nullptr */
-    /* implicit */ operator bool() const noexcept
-    { return static_cast<bool>(self_); }
-
     /* check is the real node type T */
     template <typename T>
     friend bool is_a(BasicNode const & node)
     { return (typeid(T) == node.self_->type_()); }
 
 
+
+    /* check that self is not nullptr */
+    /* implicit */ operator bool() const noexcept
+    { return static_cast<bool>(self_); }
+
     /* convert to a real data */
     template <typename T>
+    requires (not std::is_same_v<std::remove_const_t<std::remove_reference_t<T>>, bool>)
     operator const T &() const
     {
         if (not is_a<T>(*this))
@@ -279,6 +281,7 @@ public:
     }
 
     template <typename T>
+    requires (not std::is_same_v<std::remove_const_t<std::remove_reference_t<T>>, bool>)
     operator T () const
     {
         if (not is_a<T>(*this))
