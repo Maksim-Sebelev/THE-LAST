@@ -132,7 +132,7 @@ BasicNode node_from_json(const boost::json::value& jv)
         for (auto&& if_jv : obj.at(traits::get_node_info<Condition, traits::FIELD, 0>()).as_array())
             node.add_condition(node_from_json(if_jv));
 
-        if (obj.contains(traits::get_node_info<Condition, traits::FIELD, 0>()))
+        if (obj.contains(traits::get_node_info<Condition, traits::FIELD, 1>()))
         {
             auto&& else_node = node_from_json(obj.at(traits::get_node_info<Condition, traits::FIELD, 1>()));
             node.set_else(std::move(else_node));
