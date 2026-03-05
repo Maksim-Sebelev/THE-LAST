@@ -197,9 +197,15 @@ int main() try
     write(ast, "ast.2.json");
     dump(readed_ast, "ast.2.dot", "readed-ast.svg");
 
-    auto&& lastastroot = create(Print{n7});
+    auto&& name = create(Variable{"artem_lobachev"});
+    auto&& num = create(NumberLiteral{999});
+    auto&& num2 = create(NumberLiteral{13});
+    auto&& binop = create(BinaryOperator{BinaryOperator::ASGN, name, num});
+    auto&& print = create(Print{n7, num2, binop});
+    auto&& lastastroot = create(Scope{binop, print});
     auto&& lastast = AST{std::move(lastastroot)};
-    write(lastast, "last.json");
+    write(lastast, "last.ast.json");
+    dump(lastast, "ast.json.dot", "ast.json.svg");
 
     std::cout << std::boolalpha << is_a<StringLiteral>(n7) << "\n" << is_a<NumberLiteral>(n7) << "\n";
 

@@ -227,13 +227,7 @@ void visit(Condition const& node, unique_node_id_t unique_node_id, std::ofstream
     for (auto&& it = ifs.begin() + 1, ite = ifs.end(); it != ite; ++it)
         graphic_dump::dump_and_link_with_parent(os, unique_node_id, *it, "else-if");
 
-
-    // for (auto&& arg : node.get_ifs())
-    // {
-        // graphic_dump::dump_and_link_with_parent(os, unique_node_id, arg, (first_if ? "if" : "elif"));
-        // first_if = false;
-    // }
-
+    if (not node.has_else()) return;
     graphic_dump::dump_and_link_with_parent(os, unique_node_id, node.get_else(), "else");
 }
 
