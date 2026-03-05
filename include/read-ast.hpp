@@ -128,12 +128,16 @@ BasicNode node_from_json(const boost::json::value& jv)
     }
     if (kind == traits::get_node_info<Condition, traits::NAME>())
     {
-        auto&& ifs = std::vector<BasicNode>{};
+        auto&& node = Condition{};
         for (auto&& if_jv : obj.at(traits::get_node_info<Condition, traits::FIELD, 0>()).as_array())
-            ifs.push_back(node_from_json(if_jv));
+            node.add_condition(node_from_json(if_jv));
 
-        auto&& else_node = node_from_json(obj.at(traits::get_node_info<Condition, traits::FIELD, 1>()));
-        auto&& node = Condition{std::move(ifs), std::move(else_node)};
+        if (obj.contains(traits::get_node_info<Else, traits::FIELD, 0>()))
+        {
+            auto&& else_node = node_from_json(obj.at(traits::get_node_info<Condition, traits::FIELD, 1>()));
+            node.set_else(std::move(else_node));
+        }
+
         return create(std::move(node));
     }
 
